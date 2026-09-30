@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020"><title>BudgetFlow Pro</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div id="toast"></div>
+
+<div id="authView" class="auth">
+  <div class="auth-box">
+    <div class="logo">Budget<span>Flow</span><b>PRO</b></div>
+    <p class="muted">Il tuo centro di controllo finanziario.</p>
+    <div class="auth-tabs"><button class="auth-tab active" data-mode="login">Accedi</button><button class="auth-tab" data-mode="signup">Registrati</button></div>
+    <form id="authForm"><label>Email<input id="email" type="email" required></label><label>Password<input id="password" type="password" minlength="6" required></label><button class="btn primary wide" id="authSubmit">Accedi</button><div id="authMsg"></div></form>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+<aside class="sidebar">
+  <div class="logo">Budget<span>Flow</span><b>PRO</b></div>
+  <div class="user-mini"><div class="avatar" id="avatar">U</div><div><strong id="userName">Utente</strong><small id="userEmail"></small></div></div>
+  <nav>
+    <button class="nav active" data-page="home">⌂ <span>Panoramica</span></button>
+    <button class="nav" data-page="movimenti">↕ <span>Movimenti</span></button>
+    <button class="nav" data-page="budget">◈ <span>Budget</span></button>
+    <button class="nav" data-page="obiettivi">◎ <span>Obiettivi</span></button>
+    <button class="nav" data-page="analisi">✦ <span>Analisi</span></button>
+    <button class="nav" data-page="impostazioni">⚙ <span>Impostazioni</span></button>
+  </nav>
+  <button id="logout" class="logout">↪ Esci</button>
+</aside>
+
+<main>
+<header><div><div class="eyebrow" id="dateLabel"></div><h1 id="title">Panoramica</h1></div><div class="head-actions"><button class="icon-btn" id="themeBtn">☾</button><button class="btn primary" id="addBtn">+ Movimento</button></div></header>
+
+<section id="home" class="page">
+ <div id="alertBox" class="smart-alert hidden"></div>
+ <div class="stats">
+  <div class="stat"><small>Saldo disponibile</small><strong id="sBalance">€0</strong><span id="sBalanceSub">Questo mese</span></div>
+  <div class="stat"><small>Entrate</small><strong id="sIncome">€0</strong><span class="positive">↑ Totale mese</span></div>
+  <div class="stat"><small>Spese</small><strong id="sExpense">€0</strong><span class="negative">↓ Totale mese</span></div>
+  <div class="stat"><small>Risparmio</small><strong id="sSaving">0%</strong><span id="sSavingSub">del reddito</span></div>
+ </div>
+ <div class="grid two">
+  <div class="card chart-card"><div class="card-head"><div><h2>Flusso di cassa</h2><p>Entrate e spese negli ultimi mesi</p></div><span class="pill">Mensile</span></div><canvas id="flowChart"></canvas></div>
+  <div class="card chart-card"><div class="card-head"><div><h2>Dove spendi</h2><p>Distribuzione delle spese</p></div></div><canvas id="catChart"></canvas></div>
+ </div>
+ <div class="grid two">
+  <div class="card"><div class="card-head"><h2>Budget categorie</h2><button class="text-btn" data-page="budget">Gestisci</button></div><div id="budgetPreview"></div></div>
+  <div class="card"><div class="card-head"><h2>Obiettivi</h2><button class="text-btn" data-page="obiettivi">Vedi tutti</button></div><div id="goalPreview"></div></div>
+ </div>
+ <div class="card"><div class="card-head"><h2>Ultimi movimenti</h2><button class="text-btn" data-page="movimenti">Vedi tutti</button></div><div id="recent"></div></div>
+</section>
+
+<section id="movimenti" class="page hidden"><div class="card"><div class="card-head"><div><h2>Movimenti</h2><p>Controlla ogni entrata e uscita.</p></div><button class="btn primary" id="addBtn2">+ Aggiungi</button></div><div class="filters"><input id="search" placeholder="⌕ Cerca..."><select id="typeFilter"><option value="">Tutti</option><option value="expense">Spese</option><option value="income">Entrate</option></select><select id="catFilter"><option value="">Tutte le categorie</option></select></div><div id="allTransactions"></div></div></section>
+
+<section id="budget" class="page hidden">
+ <div class="card"><div class="card-head"><div><h2>Budget mensile</h2><p>Imposta limiti per categoria e controlla l'avanzamento.</p></div><button class="btn primary" id="saveBudgets">Salva</button></div><div id="budgetEditor"></div></div>
+</section>
+
+<section id="obiettivi" class="page hidden">
+ <div class="card"><div class="card-head"><div><h2>Obiettivi di risparmio</h2><p>Dai un nome ai tuoi traguardi.</p></div><button class="btn primary" id="addGoal">+ Obiettivo</button></div><div id="goals"></div></div>
+</section>
+
+<section id="analisi" class="page hidden">
+ <div class="grid two"><div class="card"><div class="card-head"><h2>Analisi intelligente</h2><span class="pill purple">Automatica</span></div><div id="insights"></div></div><div class="card"><div class="card-head"><h2>Indicatori</h2></div><div id="metrics"></div></div></div>
+ <div class="card"><div class="card-head"><h2>Andamento risparmio</h2></div><canvas id="savingChart"></canvas></div>
+</section>
+
+<section id="impostazioni" class="page hidden">
+ <div class="card"><div class="card-head"><div><h2>Profilo finanziario</h2><p>Questi dati servono per personalizzare i consigli.</p></div></div>
+ <form id="profileForm" class="form-grid"><label>Nome<input id="profileName"></label><label>Guadagno netto mensile (€)<input id="incomeProfile" type="number" min="0" step=".01"></label><label>Obiettivo minimo risparmio (€)<input id="goalProfile" type="number" min="0" step=".01"></label><label>Metodo preferito<select id="strategy"><option value="balanced">Bilanciato</option><option value="saving">Risparmio aggressivo</option><option value="flexible">Flessibile</option></select></label><button class="btn primary">Salva profilo</button></form></div>
+ <div class="card danger-zone"><h2>Sessione</h2><p>Puoi uscire dall'account da qui.</p><button id="logout2" class="btn danger">Esci dall'account</button></div>
+</section>
+</main></div>
+
+<div id="modal" class="modal hidden"><div class="modal-box"><div class="card-head"><h2 id="modalTitle">Nuovo movimento</h2><button class="icon-btn" id="closeModal">×</button></div>
+<form id="txForm"><label>Tipo<select id="txType"><option value="expense">Spesa</option><option value="income">Entrata</option></select></label><label>Descrizione<input id="txDesc" required placeholder="Es. Benzina"></label><div class="form-grid"><label>Categoria<select id="txCat"></select></label><label>Importo (€)<input id="txAmount" type="number" min=".01" step=".01" required></label></div><label>Data<input id="txDate" type="date" required></label><label><span>Ricorrente</span><select id="txRecurring"><option value="none">No</option><option value="monthly">Ogni mese</option></select></label><button class="btn primary wide">Salva movimento</button></form></div></div>
+
+<div id="goalModal" class="modal hidden"><div class="modal-box"><div class="card-head"><h2>Nuovo obiettivo</h2><button class="icon-btn" id="closeGoal">×</button></div><form id="goalForm"><label>Nome<input id="goalName" required placeholder="Es. Auto nuova"></label><div class="form-grid"><label>Target (€)<input id="goalTarget" type="number" min=".01" step=".01" required></label><label>Già risparmiati (€)<input id="goalCurrent" type="number" min="0" step=".01" value="0"></label></div><label>Scadenza<input id="goalDate" type="date"></label><button class="btn primary wide">Crea obiettivo</button></form></div></div>
+<script src="app.js"></script>
+</body></html>
