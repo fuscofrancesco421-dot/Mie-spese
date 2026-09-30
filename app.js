@@ -1,7 +1,13 @@
 const URL="https://xchtpazgbruatvefkaqy.supabase.co";
 const KEY="sb_publishable_KzxnoF7Lm-JISN1C7CBDog_I0nZNVia";
-const configured=!URL.startsWith("INSERISCI_")&&!KEY.startsWith("INSERISCI_");
-const db=configured?supabase.createClient(URL,KEY):null;
+const configured =
+  !URL.startsWith("INSERISCI_") &&
+  !KEY.startsWith("INSERISCI_");
+
+const db =
+  configured && window.supabase
+    ? window.supabase.createClient(URL,KEY)
+    : null;
 const CATS=[
   "Casa",
   "Alimentari",
